@@ -21,13 +21,13 @@ import com.techacademy.service.EmployeeService;
 import com.techacademy.service.UserDetail;
 
 @Controller
-@RequestMapping("employees")
-public class EmployeeController {
+@RequestMapping("reports")
+public class ReportController {
 
     private final EmployeeService employeeService;
 
     @Autowired
-    public EmployeeController(EmployeeService employeeService) {
+    public ReportController(EmployeeService employeeService) {
         this.employeeService = employeeService;
     }
 
@@ -35,10 +35,10 @@ public class EmployeeController {
     @GetMapping
     public String list(Model model) {
 
-        model.addAttribute("listSize", employeeService.findAll().size());
-        model.addAttribute("employeeList", employeeService.findAll());
+//        model.addAttribute("listSize", employeeService.findAll().size());
+//        model.addAttribute("employeeList", employeeService.findAll());
 
-        return "employees/list";
+        return "reports/list";
     }
 
     // 従業員詳細画面
@@ -109,7 +109,7 @@ public class EmployeeController {
         return "employees/update";
     }
 
-    // 従業員更新処理
+    // 従業員処理
     @PostMapping(value = "/update")
     public String update(@Validated Employee employee, BindingResult res, Model model) {
 

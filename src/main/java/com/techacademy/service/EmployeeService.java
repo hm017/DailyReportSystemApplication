@@ -56,6 +56,8 @@ public class EmployeeService {
     @Transactional
     public ErrorKinds update(Employee employee) {
 
+        Employee existEmployee = this.findByCode(employee.getCode());
+
         // パスワードチェック
         if (employee.getPassword() != null && !employee.getPassword().isEmpty()) {
             ErrorKinds result = employeePasswordCheck(employee);
@@ -63,10 +65,10 @@ public class EmployeeService {
                 return result;
             }
         } else {
-            Employee existEmployee = this.findByCode(employee.getCode());
             employee.setPassword(existEmployee.getPassword());
         }
 
+        employee.setCreatedAt(existEmployee.getCreatedAt());
         LocalDateTime now = LocalDateTime.now();
         employee.setUpdatedAt(now);
 
