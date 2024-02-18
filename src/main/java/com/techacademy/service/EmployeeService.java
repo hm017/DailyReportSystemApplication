@@ -62,12 +62,12 @@ public class EmployeeService {
             if (ErrorKinds.CHECK_OK != result) {
                 return result;
             }
+        } else {
+            Employee existEmployee = this.findByCode(employee.getCode());
+            employee.setPassword(existEmployee.getPassword());
         }
 
-        employee.setDeleteFlg(false);
-
         LocalDateTime now = LocalDateTime.now();
-        employee.setCreatedAt(now);
         employee.setUpdatedAt(now);
 
         employeeRepository.save(employee);
