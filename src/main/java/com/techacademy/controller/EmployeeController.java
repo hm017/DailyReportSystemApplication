@@ -34,17 +34,14 @@ public class EmployeeController {
     // 従業員一覧画面
     @GetMapping
     public String list(Model model) {
-
         model.addAttribute("listSize", employeeService.findAll().size());
         model.addAttribute("employeeList", employeeService.findAll());
-
         return "employees/list";
     }
 
     // 従業員詳細画面
     @GetMapping(value = "/{code}/")
     public String detail(@PathVariable String code, Model model) {
-
         model.addAttribute("employee", employeeService.findByCode(code));
         return "employees/detail";
     }
@@ -52,14 +49,12 @@ public class EmployeeController {
     // 従業員新規登録画面
     @GetMapping(value = "/add")
     public String create(@ModelAttribute Employee employee) {
-
         return "employees/new";
     }
 
     // 従業員新規登録処理
     @PostMapping(value = "/add")
     public String add(@Validated Employee employee, BindingResult res, Model model) {
-
         // パスワード空白チェック
         /*
          * エンティティ側の入力チェックでも実装は行えるが、更新の方でパスワードが空白でもチェックエラーを出さずに
@@ -69,11 +64,8 @@ public class EmployeeController {
             // パスワードが空白だった場合
             model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.BLANK_ERROR),
                     ErrorMessage.getErrorValue(ErrorKinds.BLANK_ERROR));
-
             return create(employee);
-
         }
-
         // 入力チェック
         if (res.hasErrors()) {
             return create(employee);
@@ -83,65 +75,50 @@ public class EmployeeController {
         // (findByIdでは削除フラグがTRUEのデータが取得出来ないため)
         try {
             ErrorKinds result = employeeService.save(employee);
-
             if (ErrorMessage.contains(result)) {
                 model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
                 return create(employee);
             }
-
         } catch (DataIntegrityViolationException e) {
             model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.DUPLICATE_EXCEPTION_ERROR),
                     ErrorMessage.getErrorValue(ErrorKinds.DUPLICATE_EXCEPTION_ERROR));
             return create(employee);
         }
-
         return "redirect:/employees";
     }
 
     // 従業員更新画面
     @GetMapping(value = "/{code}/update")
-    public String edit(@PathVariable String code,Employee employee ,Model model) {
-        if (code != null) {
-            model.addAttribute("employee", employeeService.findByCode(code));
-        } else {
-            model.addAttribute("employee", employee);
-        }
+    public String edit(@PathVariable String code, Model model) {
+        model.addAttribute("employee", employeeService.findByCode(code));
         return "employees/update";
     }
 
     // 従業員更新処理
-    @PostMapping(value = "/update")
-    public String update(@Validated Employee employee, BindingResult res, Model model) {
-
+    @PostMapping(value = "/{code}/update")
+    public String update(@PathVariable String code, @Validated Employee employee, BindingResult res, Model model) {
         // 入力チェック
         if (res.hasErrors()) {
-            return edit(null,employee,model);
+            model.addAttribute("employee", employee);
+            return "employees/update";
         }
-
-        // 論理削除を行った従業員番号を指定すると例外となるためtry~catchで対応
-        // (findByIdでは削除フラグがTRUEのデータが取得出来ないため)
         ErrorKinds result = employeeService.update(employee);
-
         if (ErrorMessage.contains(result)) {
             model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
-            return edit(null,employee,model);
+            return edit(code, model);
         }
-
         return "redirect:/employees";
     }
 
     // 従業員削除処理
     @PostMapping(value = "/{code}/delete")
     public String delete(@PathVariable String code, @AuthenticationPrincipal UserDetail userDetail, Model model) {
-
         ErrorKinds result = employeeService.delete(code, userDetail);
-
         if (ErrorMessage.contains(result)) {
             model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
             model.addAttribute("employee", employeeService.findByCode(code));
             return detail(code, model);
         }
-
         return "redirect:/employees";
     }
 

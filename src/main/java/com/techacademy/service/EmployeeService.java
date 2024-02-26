@@ -56,22 +56,15 @@ public class EmployeeService {
     @Transactional
     public ErrorKinds update(Employee employee) {
 
-        Employee existEmployee = this.findByCode(employee.getCode());
-
-        // パスワードチェック
-        if (employee.getPassword() != null && !employee.getPassword().isEmpty()) {
+        if(!employee.getPassword().isEmpty()) {
             ErrorKinds result = employeePasswordCheck(employee);
             if (ErrorKinds.CHECK_OK != result) {
                 return result;
             }
-        } else {
-            employee.setPassword(existEmployee.getPassword());
         }
 
-        employee.setCreatedAt(existEmployee.getCreatedAt());
         LocalDateTime now = LocalDateTime.now();
         employee.setUpdatedAt(now);
-
         employeeRepository.save(employee);
         return ErrorKinds.SUCCESS;
     }

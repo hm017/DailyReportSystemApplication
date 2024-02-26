@@ -2,12 +2,8 @@ package com.techacademy.controller;
 
 import java.util.List;
 
-import javax.management.relation.Role;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -20,35 +16,30 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.techacademy.constants.ErrorKinds;
 import com.techacademy.constants.ErrorMessage;
-import com.techacademy.entity.Employee;
 import com.techacademy.entity.Report;
-import com.techacademy.service.EmployeeService;
 import com.techacademy.service.ReportService;
 import com.techacademy.service.UserDetail;
-
 
 @Controller
 @RequestMapping("reports")
 public class ReportController {
 
-
     private final ReportService reportService;
-    private final EmployeeService employeeService;
-
 
     @Autowired
-    public ReportController(ReportService reportService, EmployeeService employeeService) {
+    public ReportController(ReportService reportService) {
         this.reportService = reportService;
-        this.employeeService = employeeService;
     }
 
     // 日報一覧画面
     @GetMapping
     public String list(Model model, @AuthenticationPrincipal UserDetail userDetail) {
 
+        // 管理者権限のログインユーザー
         if (userDetail.getEmployee().getRole().toString() == "ADMIN") {
             model.addAttribute("listSize", reportService.findAll().size());
             model.addAttribute("reportList", reportService.findAll());
+        // 一般権限のログインユーザー
         } else {
             //Employee employee = userDetail.getEmployee();
             model.addAttribute("listSize", reportService.findByEmployee(userDetail.getEmployee()).size());
@@ -67,64 +58,73 @@ public class ReportController {
     // 日報新規登録画面
     @GetMapping(value = "/add")
     public String create(@ModelAttribute Report report, @AuthenticationPrincipal UserDetail userDetail, Model model) {
-        model.addAttribute("name", userDetail.getEmployee().getName());
+        model.addAttribute("name", userDetail.getEmployee().getName()); //ログインユーザーの氏名
         return "reports/new";
     }
 
     // 日報新規登録処理
     @PostMapping(value = "/add")
     public String add(@Validated Report report, BindingResult res, @AuthenticationPrincipal UserDetail userDetail, Model model) {
-
         // 入力チェック
         if (res.hasErrors()) {
             return create(report, userDetail, model);
         }
-
-        // 同じ日付があればエラー
-        List<Report> result = reportService.findByEmployeeAndReportDate(userDetail.getEmployee(), report.getReportDate());
-        if (!result.isEmpty()) {
-            model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.DATECHECK_ERROR),
-                    ErrorMessage.getErrorValue(ErrorKinds.DATECHECK_ERROR));
+        ErrorKinds result = reportService.save(report, userDetail);
+        if (ErrorMessage.contains(result)) {
+            model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
             return create(report, userDetail, model);
         }
-
-        reportService.save(report, userDetail.getEmployee());
-
-
-
-        // 論理削除を行った従業員番号を指定すると例外となるためtry~catchで対応
-        // (findByIdでは削除フラグがTRUEのデータが取得出来ないため)
-/*
-        try {
-            ErrorKinds result = employeeService.save(employee);
-
-            if (ErrorMessage.contains(result)) {
-                model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
-                return create(employee);
-            }
-
-        } catch (DataIntegrityViolationException e) {
-            model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.DUPLICATE_EXCEPTION_ERROR),
-                    ErrorMessage.getErrorValue(ErrorKinds.DUPLICATE_EXCEPTION_ERROR));
-            return create(employee);
-        }
-*/
         return "redirect:/reports";
     }
 
     // 日報更新画面
     @GetMapping(value = "/{id}/update")
     public String edit(@PathVariable Integer id, Model model) {
+
         model.addAttribute("report", reportService.findById(id));
+
         return "reports/update";
     }
+
+
+    // 日報更新処理
+    @PostMapping(value = "/{id}/update")
+    public String update(@PathVariable Integer id, @Validated Report report, BindingResult res, Model model) {
+        // 入力チェック
+        if (res.hasErrors()) {
+            model.addAttribute("report", report);
+            return "reports/update";
+        }
+
+        ErrorKinds result = reportService.update(report);
+        if (ErrorMessage.contains(result)) {
+            model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
+            return edit(id, model);
+        }
+
+        return "redirect:/reports";
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
     // 日報更新処理
     @PostMapping(value = "/{id}/update")
     public String update(@PathVariable Integer id, @Validated Report report, BindingResult res, Model model) {
 
-        // エラーチェック
+        // 入力チェック
         if (res.hasErrors()) {
             model.addAttribute("report", report);
             return "reports/update";
