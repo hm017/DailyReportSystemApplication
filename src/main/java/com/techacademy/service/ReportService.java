@@ -57,9 +57,7 @@ public class ReportService {
     public ErrorKinds update(Report report) {
 
         Employee employee = report.getEmployee();
-
         ErrorKinds result = employeeRegistCheck(employee, report);
-
         if (ErrorKinds.CHECK_OK != result) {
             return result;
         }
@@ -72,7 +70,7 @@ public class ReportService {
 
     // 「画面で表示中の従業員 かつ 入力した日付」の日報データが存在する場合エラー
     private ErrorKinds employeeRegistCheck(Employee employee, Report report) {
-;
+
         // 画面上の従業員の入力した日付以外取得
         List<Report> result = reportRepository.findByEmployeeAndReportDate(employee, report.getReportDate());
         //空ではない　→すでに登録してある日がある
@@ -87,11 +85,6 @@ public class ReportService {
         }
         return ErrorKinds.CHECK_OK;
     }
-
-//    // 日付を取得する
-//    public List<Report> findByEmployeeAndReportDate(Employee employee, Report report) {
-//        return reportRepository.findByEmployeeAndReportDate(employee, report.getReportDate());
-//    }
 
     // 日報削除
     @Transactional
