@@ -42,10 +42,11 @@ public class ReportService {
         return ErrorKinds.SUCCESS;
     }
 
-    //　「ログイン中の従業員 かつ 入力した日付」の日報データが存在する場合エラー
+    // 日報保存処理で、「ログイン中の従業員 かつ 入力した日付」の日報データが存在する場合エラー
     private ErrorKinds loginUserRegistCheck(Employee employee, Report report) {
-        //
+        // ログイン中の従業員の入力した日付を取得
         List<Report> result = reportRepository.findByEmployeeAndReportDate(employee, report.getReportDate());
+        // すでに登録してある日がある場合
         if (!result.isEmpty()) {
             return ErrorKinds.DATECHECK_ERROR;
         }
@@ -68,12 +69,11 @@ public class ReportService {
         return ErrorKinds.SUCCESS;
     }
 
-    // 「画面で表示中の従業員 かつ 入力した日付」の日報データが存在する場合エラー
+    // 日報更新処理で、「画面で表示中の従業員 かつ 入力した日付」の日報データが存在する場合エラー
     private ErrorKinds employeeRegistCheck(Employee employee, Report report) {
-
-        // 画面上の従業員の入力した日付以外取得
+        // 画面上の従業員の入力した日付を取得
         List<Report> result = reportRepository.findByEmployeeAndReportDate(employee, report.getReportDate());
-        //空ではない　→すでに登録してある日がある
+        //　すでに登録してある日がある場合
         if (!result.isEmpty()) {
             for (int i = 0; i < result.size(); i++) {
                 int id = result.get(i).getId();
@@ -100,6 +100,7 @@ public class ReportService {
         return reportRepository.findAll();
     }
 
+    // 一般権限のログインユーザーを検索
     public List<Report> findByEmployee(Employee employee) {
         return reportRepository.findByEmployee(employee);
     }
