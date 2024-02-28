@@ -70,6 +70,7 @@ public class ReportController {
         if (res.hasErrors()) {
             return create(report, userDetail, model);
         }
+        // 登録処理
         ErrorKinds result = reportService.save(report, userDetail);
         if (ErrorMessage.contains(result)) {
             model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
@@ -81,9 +82,7 @@ public class ReportController {
     // 日報更新画面
     @GetMapping(value = "/{id}/update")
     public String edit(@PathVariable Integer id, Model model) {
-
         model.addAttribute("report", reportService.findById(id));
-
         return "reports/update";
     }
 
@@ -95,7 +94,7 @@ public class ReportController {
             model.addAttribute("report", report);
             return "reports/update";
         }
-//        LocalDate s = report.getReportDate();
+        // 更新処理
         ErrorKinds result = reportService.update(report);
         if (ErrorMessage.contains(result)) {
             model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));

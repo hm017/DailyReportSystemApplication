@@ -74,6 +74,7 @@ public class EmployeeController {
         // 論理削除を行った従業員番号を指定すると例外となるためtry~catchで対応
         // (findByIdでは削除フラグがTRUEのデータが取得出来ないため)
         try {
+            // 登録処理
             ErrorKinds result = employeeService.save(employee);
             if (ErrorMessage.contains(result)) {
                 model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
@@ -102,6 +103,7 @@ public class EmployeeController {
             model.addAttribute("employee", employee);
             return "employees/update";
         }
+        // 更新処理
         ErrorKinds result = employeeService.update(employee);
         if (ErrorMessage.contains(result)) {
             model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
@@ -113,6 +115,7 @@ public class EmployeeController {
     // 従業員削除処理
     @PostMapping(value = "/{code}/delete")
     public String delete(@PathVariable String code, @AuthenticationPrincipal UserDetail userDetail, Model model) {
+        // 削除処理
         ErrorKinds result = employeeService.delete(code, userDetail);
         if (ErrorMessage.contains(result)) {
             model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
