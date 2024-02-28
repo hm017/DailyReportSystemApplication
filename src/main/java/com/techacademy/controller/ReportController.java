@@ -1,5 +1,6 @@
 package com.techacademy.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +87,6 @@ public class ReportController {
         return "reports/update";
     }
 
-
     // 日報更新処理
     @PostMapping(value = "/{id}/update")
     public String update(@PathVariable Integer id, @Validated Report report, BindingResult res, Model model) {
@@ -95,7 +95,7 @@ public class ReportController {
             model.addAttribute("report", report);
             return "reports/update";
         }
-
+//        LocalDate s = report.getReportDate();
         ErrorKinds result = reportService.update(report);
         if (ErrorMessage.contains(result)) {
             model.addAttribute(ErrorMessage.getErrorName(result), ErrorMessage.getErrorValue(result));
@@ -104,53 +104,6 @@ public class ReportController {
 
         return "redirect:/reports";
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-    // 日報更新処理
-    @PostMapping(value = "/{id}/update")
-    public String update(@PathVariable Integer id, @Validated Report report, BindingResult res, Model model) {
-
-        // 入力チェック
-        if (res.hasErrors()) {
-            model.addAttribute("report", report);
-            return "reports/update";
-        }
-
-        // 画面表示中の従業員で同じ日付があればエラー
-        Employee employee = report.getEmployee();
-        LocalDate updateReportDate = report.getReportDate();
-        List<Report> result = reportService.findByEmployeeAndReportDate(employee, updateReportDate);
-        // 元々の日付
-        LocalDate reportDate = reportService.findById(id).getReportDate();
-
-        // 元の日付と同じ場合はエラーを出さない
-        if (!reportDate.equals(updateReportDate)) {
-            if (!result.isEmpty()) {
-                model.addAttribute(ErrorMessage.getErrorName(ErrorKinds.DATECHECK_ERROR),
-                        ErrorMessage.getErrorValue(ErrorKinds.DATECHECK_ERROR));
-                return edit(report.getId(), model);
-            }
-        }
-
-        reportService.update(report);
-
-        return "redirect:/reports";
-    }
-*/
 
     // 日報削除処理
     @PostMapping(value = "/{id}/delete")

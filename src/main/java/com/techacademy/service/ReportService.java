@@ -77,7 +77,8 @@ public class ReportService {
 
     private ErrorKinds loginUserRegistCheck(Employee employee, Report report) {
         //
-        if (!findByEmployeeAndReportDate(employee, report.getReportDate()).isEmpty()) {
+        List<Report> result = findByEmployeeAndReportDate(employee, report);
+        if (!result.isEmpty()) {
             return ErrorKinds.DATECHECK_ERROR;
         }
         return ErrorKinds.CHECK_OK;
@@ -86,9 +87,14 @@ public class ReportService {
     // 日報更新
     @Transactional
     public ErrorKinds update(Report report) {
-
+        //レポートの内容をecに 今の人のコード　と　レポートの日付
         Employee employee = report.getEmployee();
+
+
         ErrorKinds result = employeeRegistCheck(employee, report);
+
+//        Employee employee = report.getEmployee();
+//        ErrorKinds result = employeeRegistCheck(employeeCheck, report);
         if (ErrorKinds.CHECK_OK != result) {
             return result;
         }
@@ -100,33 +106,33 @@ public class ReportService {
     }
 
     private ErrorKinds employeeRegistCheck(Employee employee, Report report) {
-        //
-        if (!findByEmployeeAndReportDate(employee, report.getReportDate()).isEmpty()) {
-            return ErrorKinds.DATECHECK_ERROR;
+        // 画面上の入力したcode
+//        String code = report.getEmployee().getCode();
+        // 画面上の入力した日付
+        LocalDate day = report.getReportDate();
+        // 画面上の従業員の入力した日付以外取得
+        List<Report> result = findByEmployeeAndReportDateNot(employee, report);
+        //空ではない　→すでに登録してある日がある
+        if (!result.isEmpty()) {
+            for (int i = 0; i < result.size(); i++) {
+                LocalDate st = result.get(i).getReportDate();
+                //今回入力とすでに登録している日があるとエラーになる
+                if (day.equals(st)) {
+                    return ErrorKinds.DATECHECK_ERROR;
+                }
+            }
         }
         return ErrorKinds.CHECK_OK;
     }
 
     // 日付を取得する
-    public List<Report> findByEmployeeAndReportDate(Employee employee, LocalDate reportDate) {
-        return reportRepository.findByEmployeeAndReportDate(employee, reportDate);
+    public List<Report> findByEmployeeAndReportDate(Employee employee, Report report) {
+        return reportRepository.findByEmployeeAndReportDate(employee, report.getReportDate());
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    public List<Report> findByEmployeeAndReportDateNot(Employee employee, Report report) {
+        return reportRepository.findByEmployeeAndReportDateNot(employee, report.getReportDate());
+    }
 
     // 日報削除
     @Transactional
